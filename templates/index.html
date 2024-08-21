@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="bg-white py-6 sm:py-8 lg:py-12">
+      <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
+        <p class="mb-2 text-center font-semibold text-indigo-500 md:mb-3 lg:text-lg">
+          Introducing
+        </p>
+        <h2
+          class="mb-4 text-center text-2xl font-bold text-gray-800 md:mb-6 lg:text-4xl"
+        >
+          CAR PRICE PREDICTOR
+        </h2>
+      </div>
+    </div>
+
+    <!-- form - start -->
+    <form
+      method="post"
+      action="#"
+      class="mx-auto grid max-w-screen-md gap-4 sm:grid-cols-2"
+      accept-charset="utf-8"
+      name="Modelform"
+    >
+      <div>
+        <label
+          for="company"
+          class="mb-2 inline-block text-sm text-gray-800 sm:text-base"
+          >Select Company<span>*</span></label
+        >
+        <select
+          name="company"
+          id="company"
+          class="w-full rounded border bg-gray-50 px-3 py-2 text-gray-800 outline-none ring-indigo-300 transition duration-100 focus:ring"
+          required
+          onchange="load_car_models(this.id, 'car_models')"
+        >
+          {% for company in companies %}
+          <option value="{{ company }}">{{ company }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label
+          for="car_models"
+          class="mb-2 inline-block text-sm text-gray-800 sm:text-base"
+          >Car Model<span>*</span></label
+        >
+        <select
+          name="car_models"
+          id="car_models"
+          class="w-full rounded border bg-gray-50 px-3 py-2 text-gray-800 outline-none ring-indigo-300 transition duration-100 focus:ring"
+        ></select>
+      </div>
+
+      <div>
+        <label
+          for="year"
+          class="mb-2 inline-block text-sm text-gray-800 sm:text-base"
+          >Select Year<span>*</span></label
+        >
+        <select
+          name="year"
+          id="year"
+          class="w-full rounded border bg-gray-50 px-3 py-2 text-gray-800 outline-none ring-indigo-300 transition duration-100 focus:ring"
+        >
+          {% for year in years %}
+          <option value="{{ year }}">{{ year }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label
+          for="fuel_type"
+          class="mb-2 inline-block text-sm text-gray-800 sm:text-base"
+          >Fuel Type<span>*</span></label
+        >
+        <select
+          name="fuel_type"
+          id="fuel_type"
+          class="w-full rounded border bg-gray-50 px-3 py-2 text-gray-800 outline-none ring-indigo-300 transition duration-100 focus:ring"
+        >
+          {% for fuel in fuel_types %}
+          <option value="{{ fuel }}">{{ fuel }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label
+          for="kilo_driven"
+          class="ml-48 mb-2 inline-block text-sm text-gray-800 sm:text-base"
+          >Enter Kilometer Driven</label
+        >
+        <input
+          name="kilo_driven"
+          id="kilo_driven"
+          class="ml-48 w-full rounded border bg-gray-50 px-3 py-2 text-gray-800 outline-none ring-indigo-300 transition duration-100 focus:ring"
+        />
+      </div>
+      <div class="flex items-center justify-between sm:col-span-2">
+        <button
+          type="button"
+          class="mx-80 inline-block rounded-lg bg-indigo-500 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-indigo-600 focus-visible:ring active:bg-indigo-700 md:text-base"
+          onclick="send_data()"
+        >
+          Predict
+        </button>
+      </div>
+    </form>
+    <!-- form - end -->
+    <br />
+    <div>
+      <div
+        class="mb-4 text-center text-2xl font-bold text-gray-800 md:mb-6 lg:text-4xl"
+        style="text-align: center"
+      >
+        <h4><span id="prediction"></span></h4>
+      </div>
+    </div>
+    <script>
+      function load_car_models(company_id, car_model_id) {
+        var company = document.getElementById(company_id);
+        var car_model = document.getElementById(car_model_id);
+        car_model.innerHTML = "";
+        {% for company in companies %}
+        if (company.value == "{{ company }}") {
+          {% for model in car_models %}
+          {% if company in model %}
+          var newOption = document.createElement("option");
+          newOption.value = "{{ model }}";
+          newOption.innerHTML = "{{ model }}";
+          car_model.options.add(newOption);
+          {% endif %}
+          {% endfor %}
+        }
+        {% endfor %}
+      }
+
+      function form_handler(event) {
+        event.preventDefault(); // Don't submit the form normally
+      }
+
+      function send_data() {
+        document.querySelector("form").addEventListener("submit", form_handler);
+
+        var fd = new FormData(document.querySelector("form"));
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "/predict", true);
+        document.getElementById("prediction").innerHTML =
+          "Wait! Predicting Price.....";
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState == XMLHttpRequest.DONE) {
+            document.getElementById("prediction").innerHTML =
+              "Prediction: ₹" + xhr.responseText;
+          }
+        };
+
+        xhr.send(fd);
+      }
+    </script>
+  </body>
+</html>
